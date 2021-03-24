@@ -1,0 +1,100 @@
+---
+title: "RStudio1"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+``` {r include=FALSE}
+library(tidyverse)
+library(knitr)
+```
+
+## 1. How many unique species per their homeworld are there?
+
+```{r include=FALSE}
+one<-starwars %>% 
+  group_by(homeworld) %>% 
+  summarise(species = n_distinct(species,na.rm = TRUE),n = n()) %>% 
+  na.omit() %>%
+  arrange(desc(species))
+
+species<-sum(one$species)
+
+```
+
+There are `r species` unique species per homeworld.
+
+
+
+
+## 2. Which character(s) did play in the Star Wars movies most?
+
+```{r include=FALSE}
+two<-starwars %>% 
+  mutate(most = lengths(films)) %>%
+  summarize(name,most) %>%
+  arrange(desc(most)) %>%
+  head(1)
+```
+
+`r two` movies he has appeared in.
+
+## 3. According to the data available, what were the average height value and the average mass value across each species?
+
+```{r echo=FALSE}
+ three<-starwars %>%
+  group_by(species) %>%
+  summarise(avg_height = mean(height), avg_mass = mean(mass)) %>%
+  na.omit()
+kable(three)
+```
+
+## 4. Create a new data set by adding a new observation to this data. This observation should be based on your own character (your name or nickname, your weight and height, your homeworld, your starships etc). Note that you can pick one or more than one Star Wars films in which you played as a movie star.
+
+```{r echo=FALSE}
+mystarwars<- add_row(starwars,name="Melisa San",films=list("A New Hope,Attack of the Clones"),starships=list("H-type Nubian yacht"),eye_color="Black",homeworld="Naboo",height=170,mass = 55,hair_color="black",skin_color="white",birth_year=1997,sex="female",gender="feminine",species="Droid",vehicles=list("Zephyr-G swoop bike"))
+kable(t(tail(mystarwars,1)),col.names = c("Added Values"))
+```
+
+## 5. Calculate the body mass index (BMI) values (dividing the mass value in kg to the square of the height value in meter) for all observations and create a new data set including BMI values and the variables titled as name, mass, height, species, hair color, skin color, eye color, sex and gender.
+
+
+```{r echo=FALSE}
+newdataset<- data.frame(name = starwars$name,mass = starwars$mass,height = starwars$height,species = starwars$species,hair_color = starwars$hair_color,skin_Color = starwars$skin_color,eye_color = starwars$eye_color,sex = starwars$sex,gender = starwars$gender,bmi = starwars$mass/(starwars$height/100)^2)
+kable(newdataset[1:10,])
+
+```
+
+## 6. With using this new dataset, categorize the observations as underweight (BMI below 18.5), healthy (BMI between 18.5-24.99), overweight (BMI between 25.0-29.99) and obese (BMI above 30.0). Find the counts of these categories with respect to species.
+
+```{r echo=FALSE}
+six<-newdataset %>%
+  group_by(species) %>%
+          mutate(underweight = ((bmi < 18.5)),
+           healty = ((18.5 < bmi) & (bmi < 24.99)),
+           overweight =((25.0 < bmi) & (bmi < 29.99)),
+           obese = ((bmi > 30.0))) %>%
+  summarise(healty = sum(healty,na.rm = TRUE),
+            underweight = sum(underweight,na.rm = TRUE),
+            overweight =   sum(overweight,na.rm = TRUE),
+            obese =  sum(obese,na.rm = TRUE)) %>%
+  na.omit()
+kable(six)
+```
+
+## 7.Plot the distribution of BMI according to sex and gender.
+```{r echo=FALSE}
+seven<-ggplot(data = newdataset,mapping = aes(x=gender, y=bmi,color=gender)) +
+  geom_boxplot()
+seven + scale_y_continuous(limits=c(0,60))
+```
+
+
+
+
+
+
+
