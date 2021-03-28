@@ -1,0 +1,144 @@
+---
+title: "RStudio2"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Assignment 2.1
+
+```{r include=FALSE}
+set.seed(2017556451)
+library(tidyverse)
+library(knitr)
+data<-read_csv("RStudio2_data.csv")
+
+newdata<- data[sample(nrow(data),size = 100),ncol=5]
+
+```
+
+### 1.Calculate the mean sales’ values for each color.
+
+```{r echo=FALSE}
+one<-newdata %>%
+  group_by(Color) %>%
+  summarise(avg_sales = mean(Sales))
+kable(one)
+```
+
+### 2. Calculate the mean sales’ values for each region.
+```{r echo=FALSE}
+two<-newdata %>%
+  group_by(Region) %>%
+  summarise(avg_sales = mean(Sales))
+kable(two)
+
+```
+
+### 3.Identify the five highest sales’ value according to date, color and region separately.
+
+```{r echo=FALSE}
+ three<-newdata %>%
+  group_by(Date) %>%
+  summarise(Sales = max(Sales)) %>%
+  arrange(desc(Sales)) %>%
+  head(5)
+  kable(three)
+  
+  four<-newdata %>%
+  group_by(Color,Sales) %>%
+  summarise(Sales = max(Sales)) %>%
+  arrange(desc(Sales)) %>%
+  head(5)
+  kable(four)
+  
+  five<-newdata %>%
+  group_by(Region,Sales) %>%
+  summarise(Sales = max(Sales)) %>%
+  arrange(desc(Sales)) %>%
+  head(5)
+  kable(five)
+```
+
+### 4.Identify the month in which the mean sales’ value is the highest.
+
+```{r include=FALSE}
+six <- newdata %>%
+  separate(Date,into = c("Day","Month","Year"),sep = "-" )
+
+
+seven<-six %>%
+  group_by(Month) %>%
+  summarise(Sales = mean(Sales)) %>%
+  arrange(desc(Sales)) %>%
+  head(1)
+```
+
+The month with the highest sales is `r seven`
+
+### 5.Plot the sales according to years.
+
+```{r echo=FALSE}
+ggplot(data = six, aes(x=Year,y=Sales)) +
+  geom_bar(stat="identity",width = 0.3,fill = "pink")
+```
+
+## Assignment 2.2
+
+```{r include=FALSE}
+set.seed(2017556451)
+words<-stringr::words
+```
+
+### 1.Take a sample of 100 words from this data, and save this sample as a new data
+  
+```{r echo=FALSE}
+newdata <- sample(words,100)
+kable(newdata)
+```
+
+### 2.Find words which are starting with “a” and ending with “e”.
+
+```{r include=FALSE}
+start <- str_subset(newdata,"^a") 
+end <- str_subset(start,"e$")
+```
+Words are starting with “a” and ending with “e” `r end`
+
+## 3.Calculate the number of words which have more than 3 vowels.
+
+```{r echo=FALSE}
+wovels <- str_count(newdata,"[aeiou]") 
+sumwovels<-sum(wovels > 3)
+```
+
+number of words which have more than 3 vowels is `r sumwovels`.
+
+### 4.List the five longest word in your data
+
+```{r echo=FALSE}
+ eight <-str_length(newdata)
+mydata<- tibble(
+   word = newdata,
+   num = eight,
+ )
+  list<- mydata %>% 
+   group_by(word) %>% 
+   arrange(desc(num)) %>%
+   head(5)
+ kable(list)
+```
+
+### 5.Try to find word(s) which contain any of these words: age, any, day, exp, her, pro, the.
+
+```{r echo=FALSE}
+sample<-c("age","any","day","exp","her","pro")
+match<-str_c(sample,collapse = "|")
+has_swords<-str_subset(newdata,match)
+shaswords<-head(has_swords)
+```
+
+Words containing these: `r shaswords`
+
